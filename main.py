@@ -10,6 +10,9 @@ class Readable(object):
 	self.name = filename[:-4].replace("_", " ")
 	self.filename = filename
 
+    def look(self):
+	print "It has some writing on it. Try typing 'read %s' without the quotes."%self.name
+
     def __str__(self):
 	return "%s (readable)"%self.name
 
@@ -58,7 +61,7 @@ class File(object):
 
 	types = {".txt": Readable}
 	suffix = self.name[-4:]
-	obj_type = types[suffix]
+	obj_type = types.get(suffix)
 
 	if obj_type:
 	    return obj_type(self.name)
@@ -85,6 +88,9 @@ class Room(object):
 	    if item.name == name:
 		return item
 
+    def look(self):
+	print self
+
     def find_exit_by_name(self, name):
 	for item in self.exits:
 	    if item.name == name:
@@ -106,7 +112,7 @@ def parse_dir():
 	filenames.remove("description.txt")
 
 
-    room_objs = [File(filename).to_obj() for filename in filenames]
+    room_objs = filter(None, [File(filename).to_obj() for filename in filenames])
     # Split up the objects
     exits = []
     contents = []
@@ -149,8 +155,16 @@ def action(*args):
 @action
 def look(context, target):
     loc = context['location']
-    #print loc.contents
-    print loc
+    if target:
+	# Strip 'at'
+	if target[0] == "at":
+	    target.remove("at")
+
+	target = loc.find_by_name(" ".join(target))
+    else:
+	target = loc
+
+    target.look()
 
 @action("quit")
 def exit(context, target):
@@ -193,7 +207,7 @@ def go(context, target):
 	exit.go()
 	new_loc = parse_dir()
 	context['location'] = new_loc
-	print new_loc
+	new_loc.look()
     except Exception, e:
 	print "I'm sorry, I couldn't figure out how to go '%s'."%target
 	
@@ -216,7 +230,7 @@ def eval_line(line, context):
 def main():
     cur_dir = os.chdir("outside")
     room = parse_dir()
-    print room
+    room.look()
     context = {"location": room}
 
     # repl
