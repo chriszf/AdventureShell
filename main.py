@@ -1,7 +1,24 @@
 #/usr/bin/env python
 
 import os, stat, sys
+import textwrap
 
+WRAP = textwrap.TextWrapper(width=80, replace_whitespace=False)
+
+def emit(string):
+    paragraphs = string.splitlines()
+
+    wrapped_paragraphs = []
+
+    for p in paragraphs:
+        p_lines = WRAP.wrap(p)
+        wrapped_paragraph = "\n".join(p_lines)
+        wrapped_paragraphs.append(wrapped_paragraph)
+
+    print "\n".join(wrapped_paragraphs)
+
+
+TOP_LEVEL = "Outside"
 class Readable(object):
     def __init__(self, filename):
 	f = open(filename)
@@ -11,13 +28,13 @@ class Readable(object):
 	self.filename = filename
 
     def look(self):
-	print "It has some writing on it. Try typing 'read %s' without the quotes."%self.name
+	emit("It has some writing on it. Try typing 'read %s' without the quotes."%self.name)
 
     def __str__(self):
 	return "%s (readable)"%self.name
 
     def read(self):
-	print self.description
+	emit(self.description)
 
 
 class Exit(object):
@@ -35,7 +52,7 @@ class Exit(object):
     @staticmethod
     def parse_dirname(dirname):
 
-	if dirname == "outside":
+        if dirname == TOP_LEVEL:
 	    return (None, "Outside")
 
 	name, target = dirname.split("-")
@@ -75,7 +92,7 @@ class Room(object):
     def __init__(self, name, description, contents, exits):
 	self.description = description
 	self.exits = exits or []
-	if name != "outside":
+        if name != TOP_LEVEL:
 	    self.exits.insert(0, Exit(".."))
 	    direction, name = name.split("-")
 
@@ -89,7 +106,7 @@ class Room(object):
 		return item
 
     def look(self):
-	print self
+	emit(str(self))
 
     def find_exit_by_name(self, name):
 	for item in self.exits:
@@ -101,6 +118,7 @@ class Room(object):
 """%s
 %s
 Exits: %s
+
 You see:
 %s
 """%(self.name, self.description, ", ".join([str(exit) for exit in self.exits]) or "None", "\n".join(["\t%s"%str(item) for item in self.contents]) or "Nothing")
@@ -168,7 +186,7 @@ def look(context, target):
 
 @action("quit")
 def exit(context, target):
-    print "Thanks for playing 'adventure shell', goodbye!"
+    emit("Thanks for playing 'adventure shell', goodbye!")
     sys.exit(0)
 
 @action
@@ -176,11 +194,11 @@ def read(context, target):
     target = " ".join(target)
     try:
 	readable = context['location'].find_by_name(target)
-	print readable
+	emit(str(readable))
 	readable.read()
 
     except Exception, e:
-	print "I couldn't find anything to read."
+	emit("I couldn't find anything to read.")
 
 @action
 def cat(context, target):
@@ -191,8 +209,9 @@ def cat(context, target):
 def cd(context, target):
     try:
 	os.chdir(" ".join(target))
+        context['location'] = parse_dir()
     except:
-	print "-advshell error: No such file or directory"
+	emit("-advshell error: No such file or directory")
 
 @action
 def ls(context, target):
@@ -209,7 +228,7 @@ def go(context, target):
 	context['location'] = new_loc
 	new_loc.look()
     except Exception, e:
-	print "I'm sorry, I couldn't figure out how to go '%s'."%target
+	emit("I'm sorry, I couldn't figure out how to go '%s'."%target)
 	
 
 def eval_line(line, context):
@@ -224,11 +243,11 @@ def eval_line(line, context):
 	action(context, target)
 	
     except Exception, e:
-	print "I don't understand that."
+	emit("I don't understand that.")
 
 
 def main():
-    cur_dir = os.chdir("outside")
+    cur_dir = os.chdir(TOP_LEVEL)
     room = parse_dir()
     room.look()
     context = {"location": room}

@@ -1,1 +1,11 @@
-This is a sign with crap on it.
+Hi there! Welcome to "Adventure Shell".
+
+What you're looking at right now is a 'shell', a program designed to let you, a computer user, interact with the operating system of your computer in a text console (no mice here).
+
+The shell is thinly disguised as an adventure game in the style of "Zork". Most commands in the game map to real commands in a normal shell, but sanitized so you don't hurt yourself too much.
+
+Even this 'sign' is just a text file named 'sign.txt', and 'read sign' is a wrapper around a system command. Don't worry about that for now, it will be revealed to you as you go along.
+
+For now, ignore all that. Just explore and you'll pick up bits and pieces as you go.
+
+When you're ready, type 'go down' to continue.

@@ -1,1 +1,3 @@
-This is a description of a room
+You are standing in an open field west of a white house, with a boarded front door. Ignore that house, it's unimportant. What's more pressing is the gaping hole in the ground and a ladder leading down into the darkness.
+
+Next to the ladder is a sign. Try looking at it. (Type: look at sign)
